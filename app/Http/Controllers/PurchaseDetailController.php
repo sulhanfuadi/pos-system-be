@@ -12,16 +12,16 @@ class PurchaseDetailController extends Controller
      */
     public function index()
     {
-        // Mengambil semua data purchase_details dengan informasi tambahan dari tabel terkait
-        $purchaseDetails = DB::table('purchase_details')
-            ->join('products', 'purchase_details.product_id', '=', 'products.id')
-            ->join('purchase_transactions', 'purchase_details.transaction_id', '=', 'purchase_transactions.id')
-            ->select(
+        // get all purchase details
+        $purchaseDetails = DB::table('purchase_details') // Select table purchase_details
+            ->join('products', 'purchase_details.product_id', '=', 'products.id') // Join table product
+            ->join('purchase_transactions', 'purchase_details.transaction_id', '=', 'purchase_transactions.id') // Join table purchase_transactions
+            ->select( // Select columns
                 'purchase_details.*',
                 'products.product_name',
                 'purchase_transactions.purchase_date'
             )
-            ->get();
+            ->get(); // Get all data
 
         return response()->json($purchaseDetails);
     }
@@ -31,7 +31,7 @@ class PurchaseDetailController extends Controller
      */
     public function store(Request $request)
     {
-        // Validasi data
+        // validate request data
         $validated = $request->validate([
             'transaction_id' => 'required|exists:purchase_transactions,id',
             'product_id' => 'required|exists:products,id',
@@ -40,11 +40,11 @@ class PurchaseDetailController extends Controller
             'created_by' => 'required|exists:users,id',
         ]);
 
-        // Hitung sub_total
+        // calculate sub_total, and set updated_by
         $validated['sub_total'] = $validated['quantity'] * $validated['unit_price'];
-        $validated['updated_by'] = $validated['created_by']; // Default updated_by sama dengan created_by
+        $validated['updated_by'] = $validated['created_by']; // updated_by is the same as created_by
 
-        // Simpan ke database
+        // insert data
         $purchaseDetailId = DB::table('purchase_details')->insertGetId($validated);
 
         return response()->json([
@@ -58,7 +58,7 @@ class PurchaseDetailController extends Controller
      */
     public function show($id)
     {
-        // Ambil data berdasarkan ID
+        // get purchase detail by id
         $purchaseDetail = DB::table('purchase_details')
             ->where('purchase_details.id', $id)
             ->join('products', 'purchase_details.product_id', '=', 'products.id')
@@ -70,7 +70,7 @@ class PurchaseDetailController extends Controller
             )
             ->first();
 
-        if (!$purchaseDetail) {
+        if (!$purchaseDetail) { // If the purchase detail is not found
             return response()->json(['message' => 'Purchase detail not found.'], 404);
         }
 
@@ -82,7 +82,6 @@ class PurchaseDetailController extends Controller
      */
     public function update(Request $request, $id)
     {
-        // Validasi data
         $validated = $request->validate([
             'transaction_id' => 'sometimes|exists:purchase_transactions,id',
             'product_id' => 'sometimes|exists:products,id',
@@ -91,22 +90,22 @@ class PurchaseDetailController extends Controller
             'updated_by' => 'required|exists:users,id',
         ]);
 
-        // Jika quantity atau unit_price diupdate, hitung ulang sub_total
+        // If quantity or unit_price is updated, update sub_total
         if (isset($validated['quantity']) || isset($validated['unit_price'])) {
-            $currentDetail = DB::table('purchase_details')->where('id', $id)->first();
-            if (!$currentDetail) {
+            $currentDetail = DB::table('purchase_details')->where('id', $id)->first(); // Get current purchase detail
+            if (!$currentDetail) { // If the purchase detail is not found
                 return response()->json(['message' => 'Purchase detail not found.'], 404);
             }
 
-            $validated['quantity'] = $validated['quantity'] ?? $currentDetail->quantity;
+            $validated['quantity'] = $validated['quantity'] ?? $currentDetail->quantity; // If quantity is not updated, use the current quantity
             $validated['unit_price'] = $validated['unit_price'] ?? $currentDetail->unit_price;
-            $validated['sub_total'] = $validated['quantity'] * $validated['unit_price'];
+            $validated['sub_total'] = $validated['quantity'] * $validated['unit_price']; // Calculate sub_total
         }
 
-        // Update data
+        // update data, 
         $updated = DB::table('purchase_details')->where('id', $id)->update($validated);
 
-        if (!$updated) {
+        if (!$updated) { // If no changes made
             return response()->json(['message' => 'No changes made.'], 400);
         }
 
@@ -118,10 +117,10 @@ class PurchaseDetailController extends Controller
      */
     public function destroy($id)
     {
-        // Hapus data
+        // delete purchase detail by id
         $deleted = DB::table('purchase_details')->where('id', $id)->delete();
 
-        if (!$deleted) {
+        if (!$deleted) { // If the purchase detail is not found or could not be deleted
             return response()->json(['message' => 'Purchase detail not found or could not be deleted.'], 404);
         }
 

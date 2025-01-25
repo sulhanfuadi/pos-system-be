@@ -67,7 +67,7 @@ class ActivityLogController extends Controller
         // Retrieve specific activity log
         $activityLog = DB::table('activity_logs')->find($id);
 
-        if (!$activityLog) {
+        if (!$activityLog) { // If the activity log is not found
             return response()->json([
                 'success' => false,
                 'message' => 'Activity log not found.'
@@ -99,7 +99,7 @@ class ActivityLogController extends Controller
         // Check if the activity log exists
         $activityLog = DB::table('activity_logs')->find($id);
 
-        if (!$activityLog) {
+        if (!$activityLog) { // If the activity log is not found
             return response()->json([
                 'success' => false,
                 'message' => 'Activity log not found.'
@@ -138,7 +138,7 @@ class ActivityLogController extends Controller
         // Check if the activity log exists
         $activityLog = DB::table('activity_logs')->find($id);
 
-        if (!$activityLog) {
+        if (!$activityLog) { // If the activity log is not found
             return response()->json([
                 'success' => false,
                 'message' => 'Activity log not found.'

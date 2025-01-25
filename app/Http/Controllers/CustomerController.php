@@ -12,17 +12,9 @@ class CustomerController extends Controller
      */
     public function index()
     {
+        // Get all customers
         $customers = DB::table('customers')->get();
         return response()->json($customers);
-    }
-
-    /**
-     * Show the form for creating a new customer.
-     * (Not applicable for APIs, but retained for structure.)
-     */
-    public function create()
-    {
-        return response()->json(['message' => 'Not applicable for API.'], 400);
     }
 
     /**
@@ -30,6 +22,7 @@ class CustomerController extends Controller
      */
     public function store(Request $request)
     {
+        // Validate the request data
         $request->validate([
             'customer_name' => 'required|string|max:255',
             'contact' => 'required|string|max:255',
@@ -38,6 +31,7 @@ class CustomerController extends Controller
             'updated_by' => 'required|integer|exists:users,id',
         ]);
 
+        // Insert the customer into the database
         $id = DB::table('customers')->insertGetId([
             'customer_name' => $request->customer_name,
             'contact' => $request->contact,
@@ -56,9 +50,10 @@ class CustomerController extends Controller
      */
     public function show($id)
     {
+        // Find the customer
         $customer = DB::table('customers')->find($id);
 
-        if (!$customer) {
+        if (!$customer) { // If the customer is not found
             return response()->json(['message' => 'Customer not found.'], 404);
         }
 
@@ -66,26 +61,19 @@ class CustomerController extends Controller
     }
 
     /**
-     * Show the form for editing the specified customer.
-     * (Not applicable for APIs, but retained for structure.)
-     */
-    public function edit($id)
-    {
-        return response()->json(['message' => 'Not applicable for API.'], 400);
-    }
-
-    /**
      * Update the specified customer in storage.
      */
     public function update(Request $request, $id)
     {
+        // Validate the request data
         $request->validate([
             'customer_name' => 'string|max:255',
             'contact' => 'string|max:255',
             'address' => 'string',
-            'updated_by' => 'required|integer|exists:users,id',
+            'updated_by' => 'required|integer|exists:users,id', // Check if the user exists
         ]);
 
+        // Update the customer
         $affectedRows = DB::table('customers')->where('id', $id)->update([
             'customer_name' => $request->customer_name,
             'contact' => $request->contact,
@@ -94,7 +82,7 @@ class CustomerController extends Controller
             'updated_at' => now(),
         ]);
 
-        if ($affectedRows === 0) {
+        if ($affectedRows === 0) { // If no rows were affected
             return response()->json(['message' => 'Customer not found or nothing to update.'], 404);
         }
 
@@ -106,9 +94,10 @@ class CustomerController extends Controller
      */
     public function destroy($id)
     {
+        // Delete the customer
         $deleted = DB::table('customers')->where('id', $id)->delete();
 
-        if (!$deleted) {
+        if (!$deleted) { // If the customer is not found
             return response()->json(['message' => 'Customer not found.'], 404);
         }
 

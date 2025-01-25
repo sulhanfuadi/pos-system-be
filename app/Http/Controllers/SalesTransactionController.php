@@ -12,6 +12,7 @@ class SalesTransactionController extends Controller
      */
     public function index()
     {
+        // Get all sales transactions
         $transactions = DB::table('sales_transactions')
             ->join('customers', 'sales_transactions.customer_id', '=', 'customers.id')
             ->select(
@@ -32,10 +33,11 @@ class SalesTransactionController extends Controller
             'customer_id' => 'required|exists:customers,id',
             'transaction_date' => 'required|date',
             'total_payment' => 'required|numeric',
-            'created_by' => 'required|exists:users,id',
+            'created_by' => 'required|exists:users,id', // exists:table,column is used to check if the value exists in the specified table and column
             'updated_by' => 'required|exists:users,id',
         ]);
 
+        // Insert the sales transaction into the database
         $transactionId = DB::table('sales_transactions')->insertGetId([
             'customer_id' => $validated['customer_id'],
             'transaction_date' => $validated['transaction_date'],
@@ -54,6 +56,7 @@ class SalesTransactionController extends Controller
      */
     public function show($id)
     {
+        // Find the sales transaction, join with customers table
         $transaction = DB::table('sales_transactions')
             ->join('customers', 'sales_transactions.customer_id', '=', 'customers.id')
             ->select(
@@ -63,7 +66,7 @@ class SalesTransactionController extends Controller
             ->where('sales_transactions.id', $id)
             ->first();
 
-        if (!$transaction) {
+        if (!$transaction) { // If the transaction is not found
             return response()->json(['message' => 'Transaction not found'], 404);
         }
 
@@ -82,6 +85,7 @@ class SalesTransactionController extends Controller
             'updated_by' => 'required|exists:users,id',
         ]);
 
+        // Update the sales transaction
         $affected = DB::table('sales_transactions')
             ->where('id', $id)
             ->update([
@@ -92,7 +96,7 @@ class SalesTransactionController extends Controller
                 'updated_at' => now(),
             ]);
 
-        if ($affected === 0) {
+        if ($affected === 0) { // If no rows were affected
             return response()->json(['message' => 'Transaction not found or no changes made'], 404);
         }
 
@@ -104,9 +108,10 @@ class SalesTransactionController extends Controller
      */
     public function destroy($id)
     {
+        // Delete the sales transaction
         $deleted = DB::table('sales_transactions')->where('id', $id)->delete();
 
-        if ($deleted === 0) {
+        if ($deleted === 0) { // If the transaction is not found
             return response()->json(['message' => 'Transaction not found'], 404);
         }
 

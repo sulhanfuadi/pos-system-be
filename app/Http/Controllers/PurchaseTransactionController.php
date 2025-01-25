@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class PurchaseTransactionController extends Controller
 {
@@ -13,6 +12,7 @@ class PurchaseTransactionController extends Controller
      */
     public function index()
     {
+        // Get all purchase transactions
         $purchaseTransactions = DB::table('purchase_transactions')
             ->select('id', 'purchase_date', 'total_cost', 'created_at', 'updated_at')
             ->get();
@@ -32,13 +32,14 @@ class PurchaseTransactionController extends Controller
             'updated_by' => 'required|exists:users,id',
         ]);
 
+        // Insert the purchase transaction into the database
         $id = DB::table('purchase_transactions')->insertGetId([
             'purchase_date' => $validatedData['purchase_date'],
             'total_cost' => $validatedData['total_cost'],
             'created_by' => $validatedData['created_by'],
             'updated_by' => $validatedData['updated_by'],
-            'created_at' => Carbon::now(),
-            'updated_at' => Carbon::now(),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         return response()->json([
@@ -52,11 +53,12 @@ class PurchaseTransactionController extends Controller
      */
     public function show($id)
     {
+        // Find the purchase transaction
         $purchaseTransaction = DB::table('purchase_transactions')
             ->where('id', $id)
             ->first();
 
-        if (!$purchaseTransaction) {
+        if (!$purchaseTransaction) { // If the purchase transaction is not found
             return response()->json(['message' => 'Purchase transaction not found.'], 404);
         }
 
@@ -74,19 +76,21 @@ class PurchaseTransactionController extends Controller
             'updated_by' => 'required|exists:users,id',
         ]);
 
+        // Find the purchase transaction by id
         $purchaseTransaction = DB::table('purchase_transactions')->where('id', $id)->first();
 
-        if (!$purchaseTransaction) {
+        if (!$purchaseTransaction) { // If the purchase transaction is not found
             return response()->json(['message' => 'Purchase transaction not found.'], 404);
         }
 
+        // Update the purchase transaction, if the data is not provided, use the old data
         DB::table('purchase_transactions')
             ->where('id', $id)
             ->update([
                 'purchase_date' => $validatedData['purchase_date'] ?? $purchaseTransaction->purchase_date,
                 'total_cost' => $validatedData['total_cost'] ?? $purchaseTransaction->total_cost,
                 'updated_by' => $validatedData['updated_by'],
-                'updated_at' => Carbon::now(),
+                'updated_at' => now(),
             ]);
 
         return response()->json(['message' => 'Purchase transaction updated successfully.'], 200);
@@ -97,12 +101,14 @@ class PurchaseTransactionController extends Controller
      */
     public function destroy($id)
     {
+        // Find the purchase transaction
         $purchaseTransaction = DB::table('purchase_transactions')->where('id', $id)->first();
 
-        if (!$purchaseTransaction) {
+        if (!$purchaseTransaction) { // If the purchase transaction is not found
             return response()->json(['message' => 'Purchase transaction not found.'], 404);
         }
 
+        // Delete the purchase transaction with the specified id
         DB::table('purchase_transactions')->where('id', $id)->delete();
 
         return response()->json(['message' => 'Purchase transaction deleted successfully.'], 200);

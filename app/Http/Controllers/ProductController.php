@@ -12,8 +12,8 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $products = DB::table('products')->get();
-        return response()->json($products);
+        $products = DB::table('products')->get(); // Get all products
+        return response()->json($products); // Return the products
     }
 
     /**
@@ -21,14 +21,16 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
+        // Validate the request data
         $validatedData = $request->validate([
             'product_name' => 'required|string|max:255',
             'purchase_price' => 'required|numeric|min:0',
             'selling_price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
-            'created_by' => 'required|exists:users,id',
+            'created_by' => 'required|exists:users,id', // Check if the user exists
         ]);
 
+        // Insert the product into the database
         $productId = DB::table('products')->insertGetId([
             'product_name' => $validatedData['product_name'],
             'purchase_price' => $validatedData['purchase_price'],
@@ -48,9 +50,9 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        $product = DB::table('products')->find($id);
+        $product = DB::table('products')->find($id); // Find the product
 
-        if (!$product) {
+        if (!$product) { // If the product is not found
             return response()->json(['message' => 'Product not found'], 404);
         }
 
@@ -64,23 +66,26 @@ class ProductController extends Controller
     {
         $product = DB::table('products')->find($id);
 
-        if (!$product) {
+        if (!$product) { // If the product is not found
             return response()->json(['message' => 'Product not found'], 404);
         }
 
+        // Validate the request data
         $validatedData = $request->validate([
             'product_name' => 'sometimes|required|string|max:255',
             'purchase_price' => 'sometimes|required|numeric|min:0',
             'selling_price' => 'sometimes|required|numeric|min:0',
             'stock' => 'sometimes|required|integer|min:0',
-            'updated_by' => 'required|exists:users,id',
+            'updated_by' => 'required|exists:users,id', // Check if the user exists
         ]);
 
+        // Update the product
+        // Merge the validated data with the updated_at field
         $updated = DB::table('products')->where('id', $id)->update(array_merge($validatedData, [
-            'updated_at' => now(),
+            'updated_at' => now(), // Update the updated_at field
         ]));
 
-        if ($updated) {
+        if ($updated) { // If the product is updated
             return response()->json(['message' => 'Product updated successfully']);
         }
 
@@ -94,10 +99,11 @@ class ProductController extends Controller
     {
         $product = DB::table('products')->find($id);
 
-        if (!$product) {
+        if (!$product) { // If the product is not found
             return response()->json(['message' => 'Product not found'], 404);
         }
 
+        // Delete the product with the specified id
         DB::table('products')->where('id', $id)->delete();
 
         return response()->json(['message' => 'Product deleted successfully']);
