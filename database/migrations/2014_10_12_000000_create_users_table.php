@@ -20,8 +20,8 @@ class CreateUsersTable extends Migration
             $table->string('email');
             $table->string('role');
             $table->timestamps();
-            $table->foreignId('created_by')->constrained('users');
-            $table->foreignId('updated_by')->constrained('users');
+            $table->foreignId('created_by')->nullable()->constrained('users');
+            $table->foreignId('updated_by')->nullable()->constrained('users');
         });
     }
 
