@@ -32,8 +32,11 @@ class SalesDetailController extends Controller
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:1',
             'unit_price' => 'required|numeric|min:0',
-            'sub_total' => 'required|numeric|min:0',
+            'created_by' => 'required|exists:users,id', // Check if the user exists
         ]);
+
+        // Calculate the sub total
+        $sub_total = $request->quantity * $request->unit_price;
 
         // Insert the sales detail into the database
         $salesDetail = DB::table('sales_details')->insert([
@@ -41,9 +44,11 @@ class SalesDetailController extends Controller
             'product_id' => $request->product_id,
             'quantity' => $request->quantity,
             'unit_price' => $request->unit_price,
-            'sub_total' => $request->sub_total,
-            'created_by' => auth()->id(), // Get the authenticated user id
-            'updated_by' => auth()->id(),
+            'sub_total' => $sub_total,
+            // 'created_by' => auth()->id(), // Get the authenticated user id
+            // 'updated_by' => auth()->id(),
+            'created_by' => $request->created_by,
+            'updated_by' => $request->created_by,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -85,12 +90,19 @@ class SalesDetailController extends Controller
             'product_id' => 'sometimes|exists:products,id',
             'quantity' => 'sometimes|integer|min:1',
             'unit_price' => 'sometimes|numeric|min:0',
-            'sub_total' => 'sometimes|numeric|min:0',
+            'updated_by' => 'required|exists:users,id', // added updated_by validation
         ]);
 
         // Get the sales detail, check if it exists
-        $updateData = $request->only(['transaction_id', 'product_id', 'quantity', 'unit_price', 'sub_total']); // Get the request data
-        $updateData['updated_by'] = auth()->id(); // Get the authenticated user id
+        $updateData = $request->only(['transaction_id', 'product_id', 'quantity', 'unit_price']); // Get the request data
+
+        // Calculate sub_total if quantity and unit_price are provided
+        if ($request->has('quantity') && $request->has('unit_price')) {
+            $updateData['sub_total'] = $request->quantity * $request->unit_price;
+        }
+
+        // $updateData['updated_by'] = auth()->id(); // Get the authenticated user id
+        $updatedData['updated_by'] = $request->updated_by; // Get the updated_by from the request
         $updateData['updated_at'] = now();
 
         // Update the sales detail
