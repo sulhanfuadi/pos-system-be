@@ -42,7 +42,7 @@ class CustomerController extends Controller
             'updated_at' => now(),
         ]);
 
-        return response()->json(['message' => 'Customer created successfully.', 'id' => $id]);
+        return response()->json(['message' => 'Customer created successfully.', 'id' => $id], 201);
     }
 
     /**
