@@ -33,8 +33,8 @@ class UserController extends Controller
             'password' => 'required|string|min:8',
             'email'    => 'required|email|unique:users,email',
             'role'     => 'required|string',
-            'created_by' => 'required|integer|exists:users,id',
-            'updated_by' => 'required|integer|exists:users,id',
+            'created_by' => 'nullable|integer|exists:users,id',
+            'updated_by' => 'nullable|integer|exists:users,id',
         ]);
 
         // insert user
