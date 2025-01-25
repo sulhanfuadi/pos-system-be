@@ -33,8 +33,8 @@ class UserController extends Controller
             'password' => 'required|string|min:8',
             'email'    => 'required|email|unique:users,email',
             'role'     => 'required|string',
-            'created_by' => 'nullable|integer|exists:users,id',
-            'updated_by' => 'nullable|integer|exists:users,id',
+            'created_by' => 'required|integer|exists:users,id',
+            'updated_by' => 'required|integer|exists:users,id',
         ]);
 
         // insert user
@@ -53,7 +53,7 @@ class UserController extends Controller
             'status' => 'success',
             'message' => 'User created successfully',
             'data' => ['id' => $userId]
-        ]);
+        ], 201);
     }
 
     /**
@@ -87,7 +87,7 @@ class UserController extends Controller
             'password' => 'sometimes|required|string|min:8',
             'email'    => 'sometimes|required|email|unique:users,email,' . $id,
             'role'     => 'sometimes|required|string',
-            'updated_by' => 'nullable|integer|exists:users,id',
+            'updated_by' => 'required|integer|exists:users,id',
         ]);
 
         // get user by id
