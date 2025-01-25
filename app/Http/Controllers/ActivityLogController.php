@@ -56,7 +56,7 @@ class ActivityLogController extends Controller
             'success' => true,
             'message' => 'Activity log created successfully.',
             'data' => ['id' => $id]
-        ]);
+        ], 201);
     }
 
     /**
